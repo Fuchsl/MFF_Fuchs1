@@ -120,6 +120,29 @@ end
 
 % Teil 1.2.1
 %%
+ksdensity(DBlogRet);
+hold on
+%Teil 1.2.2
+
+[mu2, sigma2] = normfit(DBlogRet)
+
+x = [-10:.001:10];
+norm_pdf = normpdf(x,mu2,sigma2);
+plot(x, norm_pdf, '-r')
+hold on
+%Teil 1.2.3
+
+[Vw2,Yw2] = simulate(EstMdl,40000,'NumPaths',1,'E0',y0,'V0',sigma0);
+
+[f,xi] = ksdensity(Yw2);
+plot(xi,f,'-g');
+
+%Teil 1.2.4
+%%
+
+
+
+
 
 
 
