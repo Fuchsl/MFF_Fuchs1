@@ -20,7 +20,7 @@ daxCompPrices = getPrices(dateBeg, dateEnd, daxComp);
 
 %Teil 2.1.2
 %%
-%Berechnen der diskreten Returns mit einer abgeänderten Funktion von
+%Berechnen der diskreten Returns mit einer abgeï¿½nderten Funktion von
 %price2retWithHolidays
 daxCompRetstemp = price2retWithHolidaysdisc(daxCompPrices);
 daxCompRets=daxCompRetstemp{:,:};
@@ -43,27 +43,27 @@ CorDax=array2table(CorDax,'VariableNames',daxCompRetstemp.Properties.VariableNam
 
 %%
 %Teil 2.1.4
-% Erstellen eines Histogramm für die Korrelationswerte
+% Erstellen eines Histogramm fï¿½r die Korrelationswerte
 CorDaxtemp = triu(CorDax{:,:});
 CorDax2=CorDaxtemp(CorDaxtemp~=1 & CorDaxtemp~=0);
 
 hist(CorDax2, 20)
 xlabel('Korrelation')
-ylabel('Häufigkeit')
+ylabel('Hï¿½ufigkeit')
 title('Korrelation der 30 Dax-Unternehmen')
 hold on
 %%
 %Teil 2.1.5
-%Finden der Unternehmen mit der höchsten Korrelation
+%Finden der Unternehmen mit der hï¿½chsten Korrelation
 
 [row,col]=find(CorDax{:,:} == max(CorDax2));
 TickerSymb=CorDax.Properties.VariableNames(row);
 
-%Anzeigen der Unternehmen mit der höchsten Korrelation
+%Anzeigen der Unternehmen mit der hï¿½chsten Korrelation
 % display table
-fprintf('\nDie Tickersymbole mit der höchsten Korrelation sind:\n')
+fprintf('\nDie Tickersymbole mit der hï¿½chsten Korrelation sind:\n')
 celldisp(TickerSymb)
-fprintf('\nIhre Korrelation beträgt:\n')
+fprintf('\nIhre Korrelation betrï¿½gt:\n')
 fprintf('%1.5f     %1.5f     %1.5f\n',  max(CorDax2))
 
 %%
@@ -81,11 +81,14 @@ hold on
 %%
 %Teil 2.1.7 
 
-%Simulieren von Gewichten für das Portfolio
+%Simulieren von Gewichten fï¿½r das Portfolio
 weights=rand(200,1);
 weights(:,2)=1-weights(:,1);
 
 %%
+% you should try to find the respective stocks programmatically, not
+% hardcoded with their index 10 or 11
+
 %Berechnen des erwarteten Returns
 weightsret=Valuesdax{10,1}.*weights(:,1)+Valuesdax{11,1}.*weights(:,2);
 
@@ -128,7 +131,7 @@ weightsret1=Valuesdax{'DBK_DE','Mittelwert'}.*simw(:,1)+Valuesdax{'DPW_DE','Mitt
 cov1=cov([daxCompRetstemp{:,'DBK_DE'} ,daxCompRetstemp{:,'DPW_DE'},daxCompRetstemp{:,'TKA_DE'},...
     daxCompRetstemp{:,'CBK_DE'}] , 'omitrows');
 
-%Aufbereitung der Kovarianzen um Matrixmultiplikation machen zu können
+%Aufbereitung der Kovarianzen um Matrixmultiplikation machen zu kï¿½nnen
 xtemp = triu(cov1,1);
 ztemp=xtemp(xtemp~=0);
 %Multikplikation der Gewichte
@@ -159,9 +162,9 @@ plot(Valuesdax{'CBK_DE',2}, Valuesdax{'CBK_DE',1}, '.g','MarkerSize',28)
 %% Teil 2.1.9
 
 %Ein Punkt ist dann optimal, wenn es keinen anderen Punkt gibt, welcher
-%einen höheren erwarteten Return bei gleichzeitig nicht größerer
+%einen hï¿½heren erwarteten Return bei gleichzeitig nicht grï¿½ï¿½erer
 %Standardabweichung besitzt, oder eine niedriger Standardabweichung bei
-%mindestens gleichen Return besitzt. Somit st ein Punkt möglichst weit oben
+%mindestens gleichen Return besitzt. Somit st ein Punkt mï¿½glichst weit oben
 %links(hoher Return niedriges Risiko) zu bevorzugen. 
 % Bei einer linearen Optimierung ist damit zu rechnen, dass der optimale
-% Punkt an der Hülle des Polyeders liegt. 
+% Punkt an der Hï¿½lle des Polyeders liegt. 
