@@ -11,29 +11,39 @@ dateEnd = '01012015';
 
 %% Daten durch die Funktion getPrices laden
 DBData = getPrices(dateBeg, dateEnd, tickerSymbs);
-DBData=flip(DBData);
+
+% prices already get "flipped" in getPrices, as they are sorted according
+% to dates at the end
+%DBData=flip(DBData);
 %Teil 1.1.2)
 
 %% Umwandeln der Preise in logaritmic Returns
 
-DBPreise = price2retWithHolidays(DBData);
-DBlogRet = DBPreise{:,:}*100;
+% don't call them Preise if they are returns
+DLogRets = price2retWithHolidays(DBData);
+DBlogRet = DLogRets{:,:}*100;
 
-%% Datum auf Länge der LogReturns kürzen
+%% Datum auf Lï¿½nge der LogReturns kï¿½rzen
 
 DBDatum=numDates(DBData);
 %Teil 1.1.3
 %%
-% Garch Modell erstellen und dann schätzen
+% Garch Modell erstellen und dann schï¿½tzen
 ToEstMdl = garch(1,1);
-EstMdl = estimate(ToEstMdl,DBlogRet);
-mu=EstMdl.Constant
-sigma = sqrt(EstMdl.UnconditionalVariance)
+
+% ideally you estimate a GARCH model on zero mean returns - this was not
+% required in the homework though
+EstMdl = estimate(ToEstMdl,DBlogRet - mean(DBlogRet));
+% mu is the constant in the variance equation, not the mean equation!
+mu=EstMdl.Constant;
+
+% you want to get the conditional variances, not the unconditional one
+sigma = sqrt(infer(EstMdl,DBlogRet));
 %Teil 1.1.4
 %%
-%Berechnen der VaR der zu 95% nicht überschritten wird
+%Berechnen der VaR der zu 95% nicht ï¿½berschritten wird
 quants = [0.05];
-varNorm = norminv(quants, mu, sigma);
+varNorm = norminv(quants, mean(DBlogRet), sigma);
 %
 
 figure('position', [50 50 1200 600]);
@@ -44,7 +54,7 @@ subplot(1, 1, 1);
 % Feststellen der hist. Werte, welche den VaR unterschreiten
 exceed = DBlogRet <= varNorm;
 
-% Anzeigen der Ausreißer in rot
+% Anzeigen der Ausreiï¿½er in rot
 
 scatter(DBDatum([logical(0); exceed]), DBlogRet(exceed), '.r')
  
@@ -54,23 +64,22 @@ hold on;
 scatter(DBDatum([logical(0); ~exceed]), DBlogRet(~exceed), '.b')
 datetick 'x'
 %
-set(gca, 'xLim', [DBDatum(end) DBDatum(2)]);
+set(gca, 'xLim', [DBDatum(2) DBDatum(end)]);
 
-% Einfügen des VaR als Linie
-line([DBDatum(2) DBDatum(end)], varNorm*[1 1], ...
-    'Color', 'k')
+% plot conditional variances: they are different each day
+plot(DBDatum(2:end), varNorm, 'Color', 'k')
 
 xlabel('Datum')
 ylabel('logarithmic returns in %')
 title('DB returns and VaR exceedances')
 
 %%
-% Berechnung der Häufigkeit von Ausreißern bei Normalverteilung
+% Berechnung der Hï¿½ufigkeit von Ausreiï¿½ern bei Normalverteilung
 normFrequ = sum((DBlogRet <= varNorm)/numel(DBlogRet));
    
-% display table
+% there is no table, just a single value
 fprintf('\nExceedance frequencies:\n')
-fprintf('%1.5f     %1.5f     %1.5f\n', normFrequ);
+fprintf('%1.5f\n', normFrequ);
 
 %%
 %Teil 1.1.5
@@ -90,18 +99,17 @@ rng default;
 
 %% Berechnung der Autocorrelation
 
-autogarch = autocorr(Yw.^2);
-autohist=autocorr(DBlogRet.^2);
+% you can directly use the built-in function for a nicer plot
 
 subplot(2, 1, 1);
-plot(autogarch)
+autocorr(Yw.^2)
 title('Garch Autokorrelation')
 ylim([0 1])
 subplot(2, 1, 2);
-plot(autohist)
+autocorr(DBlogRet.^2)
 title('Historische Autokorrelation')
 ylim([0 1])
-% Die Autokorraltion ist im Garch-Modell höher als in den historischen
+% Die Autokorraltion ist im Garch-Modell hï¿½her als in den historischen
 % Daten
 %Teil 1.1.6
 %%
@@ -126,7 +134,7 @@ set(gca, 'yLim', ylim1);
 end
 
 % Es ist noch ein Unterschied zu erkennen. Bei den historischen Daten
-% sind die Schwankungen nicht so groß wie im Garch
+% sind die Schwankungen nicht so groï¿½ wie im Garch
 % Teil 1.2.1
 %%
 % Erstellung eines Plots mit der Dichte der historischen log. Returns
@@ -135,7 +143,7 @@ subplot(1, 1, 1)
 ksdensity(DBlogRet);
 hold on
 %Teil 1.2.2
-%%Hinzugügen der Dichte einer Normalverteilung
+%%Hinzugï¿½gen der Dichte einer Normalverteilung
 [mu2, sigma2] = normfit(DBlogRet);
 
 x = [-10:.001:10];
@@ -143,7 +151,7 @@ norm_pdf = normpdf(x,mu2,sigma2);
 plot(x, norm_pdf, '-r')
 hold on
 %Teil 1.2.3
-%Hinzufügen der Dichte eines simulierten Pfads mit Garch und
+%Hinzufï¿½gen der Dichte eines simulierten Pfads mit Garch und
 %Normalvertilung
 [Vw2,Yw2] = simulate(EstMdl,40000,'NumPaths',1,'E0',y0,'V0',sigma0);
 
@@ -157,7 +165,7 @@ ToEstMdlT = garch('GARCHLags',1,'ARCHLags',1, 'Distribution', 'T');
 EstMdlT = estimate(ToEstMdlT,DBlogRet);
 
 %Teil 1.2.5
-%Hinzufügen der Dichte eines simulierten Pfads mit Garch und
+%Hinzufï¿½gen der Dichte eines simulierten Pfads mit Garch und
 %T Verteilung
 
 [Vw3, Yw3] = simulate(EstMdlT,40000,'NumPaths',1,'E0',y0,'V0',sigma0);
@@ -172,7 +180,7 @@ legend('historische Daten', 'Normalverteilung','Normalverteilung GARCH ',...
 % Teil 1.2.6
 %%
 % Das Garch-Modell mit T Verteilung trifft die Dichte der historischen
-% Daten am besten. Die Normalverteilung unterschätzt extreme Werte und
+% Daten am besten. Die Normalverteilung unterschï¿½tzt extreme Werte und
 % Werte nahe an der Null. Die T Verteilung mit Garch trifft Werte
 % nahe Null besser als die anderen Dichten. Zudem werden die Fat Tails
 % besser nachgebildet.
